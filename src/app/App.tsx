@@ -1,10 +1,13 @@
+import { lazy, Suspense } from 'react';
 import StickyHeader from './components/StickyHeader';
 import SectionDivider from './components/SectionDivider';
 import SectionLabel from './components/SectionLabel';
 import CaseStudyNav from './components/CaseStudyNav';
 import ParticipantChip from './components/ParticipantChip';
 import StatCard from './components/StatCard';
-import MeridianEmbed from './components/MeridianEmbed';
+
+// Lazy-loaded: ships in its own chunk, fetched only when React renders it
+const MeridianEmbed = lazy(() => import('./components/MeridianEmbed'));
 
 export default function App() {
   return (
@@ -674,7 +677,15 @@ export default function App() {
               shelved, but taught me a lot about interaction pacing.
             </p>
 
-            <MeridianEmbed />
+            <Suspense fallback={
+              <div className="w-full mb-8 flex items-center justify-center bg-[#050403] border border-[var(--red-deep)]" style={{ height: '620px' }}>
+                <span className="font-['JetBrains_Mono'] text-[11px] text-[#39ff6e] tracking-[0.12em] animate-pulse">
+                  loading...
+                </span>
+              </div>
+            }>
+              <MeridianEmbed />
+            </Suspense>
 
             <a
               href="#contact"

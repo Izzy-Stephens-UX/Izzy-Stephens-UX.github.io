@@ -1,5 +1,8 @@
 import { useState, useRef } from 'react';
 
+// BASE_URL is injected by Vite — '/' locally, '/repo-name/' on GitHub Pages
+const GAME_SRC = `${import.meta.env.BASE_URL}projects/meridian/meridian_3.min.html`;
+
 export default function MeridianEmbed() {
   const [active, setActive] = useState(false);
   const frameRef = useRef<HTMLIFrameElement>(null);
@@ -11,7 +14,7 @@ export default function MeridianEmbed() {
         const input = frameRef.current?.contentWindow?.document.getElementById('cmd');
         (input as HTMLElement | null)?.focus();
       } catch {
-        // cross-origin or not yet loaded — no-op
+        // cross-origin guard — focus is best-effort
       }
     }, 200);
   }
@@ -40,7 +43,7 @@ export default function MeridianEmbed() {
       )}
       <iframe
         ref={frameRef}
-        src="/projects/meridian/meridian_3.min.html"
+        src={GAME_SRC}
         loading="lazy"
         title="MERIDIAN — A Text Adventure"
         allow="autoplay"

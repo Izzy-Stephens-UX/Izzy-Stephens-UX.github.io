@@ -1,5 +1,12 @@
 @custom-variant dark (&:is(.dark *));
 
+/* ─── Hero atmosphere ──────────────────────────────────────── */
+.hero-bg {
+  background-image:
+    radial-gradient(ellipse at 38% 70%, rgba(123, 79, 212, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse at 78% 20%, rgba(123, 79, 212, 0.06) 0%, transparent 40%);
+}
+
 :root {
   --font-size: 16px;
 

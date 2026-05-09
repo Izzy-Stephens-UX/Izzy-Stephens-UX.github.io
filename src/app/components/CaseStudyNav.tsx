@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const sections = [
   'The Setup',
@@ -15,31 +15,43 @@ const sections = [
 
 export default function CaseStudyNav() {
   const [activeSection, setActiveSection] = useState('Overview');
+  // Cache element references so we're not querying the DOM on every scroll tick
+  const elementsRef = useRef<(HTMLElement | null)[]>([]);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // Populate the cache once on mount (sections are static)
+    elementsRef.current = sections.map(s =>
+      document.getElementById(s.toLowerCase().replace(/\s+/g, '-'))
+    );
+
     const handleScroll = () => {
-      const sectionElements = sections.map(s =>
-        document.getElementById(s.toLowerCase().replace(/\s+/g, '-'))
-      );
+      // Skip if a frame is already queued — one repaint per scroll burst
+      if (rafRef.current !== null) return;
 
-      const current = sectionElements.find(el => {
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          return rect.top >= 0 && rect.top <= window.innerHeight / 2;
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+
+        const current = elementsRef.current.find(el => {
+          if (!el) return false;
+          const { top } = el.getBoundingClientRect();
+          return top >= 0 && top <= window.innerHeight / 2;
+        });
+
+        if (current) {
+          const name = sections.find(s =>
+            s.toLowerCase().replace(/\s+/g, '-') === current.id
+          );
+          if (name) setActiveSection(name);
         }
-        return false;
       });
-
-      if (current) {
-        const sectionName = sections.find(s =>
-          s.toLowerCase().replace(/\s+/g, '-') === current.id
-        );
-        if (sectionName) setActiveSection(sectionName);
-      }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
   return (
